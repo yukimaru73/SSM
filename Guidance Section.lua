@@ -1,4 +1,5 @@
 require("Libs.PhysicsSensorLib")
+require("Libs.PID")
 
 --I/O定義
 --[[Inputs
@@ -54,6 +55,8 @@ TL = property.getNumber("TL")
 
 --インスタンス
 PHS = PhysicsSensorLib:new()
+PID_YAW = PID:new(Kp, Ki, Kd, 0)
+PID_PITCH = PID:new(Kp, Ki, Kd, 0)
 
 ---メインループ
 function onTick()
@@ -62,13 +65,16 @@ function onTick()
 	local targetPos, targetVel =
 		Vector3:new(input.getNumber(15), input.getNumber(16), input.getNumber(17)),
 		Vector3:new(input.getNumber(18), input.getNumber(19), input.getNumber(20))
+	targetPos[2] = targetPos[2] < 0 and targetPos[2] or -1
 
 
 	--計算
-	local accGlobal, isNegative = PN(PHS:getGPS(TL), PHS.velocityGlobal, targetPos, targetVel, 1)
+	local accGlobal, isNegative = PN(PHS:getGPS(TL), PHS.velocityGlobal, targetPos, targetVel, 3)
 	local accLocal = PHS:rotateVecL2W(accGlobal, TL)
 
-	accLocal[3] = 0
+	--PID
+	local yaw = PID_YAW:update(accLocal[1], 1)
+	local pitch = PID_PITCH:update(accLocal[2], 1)
 
 	
 	--保存
