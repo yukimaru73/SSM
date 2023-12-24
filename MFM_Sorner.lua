@@ -57,6 +57,7 @@ require("Libs.PhysicsSensorLib")
 	01: Sonar Target 1 Found
 		︙
 	08: Sonar Target 8 Found
+	09: Sonar Ping Status
 ]]
 
 --グローバル変数の宣言
@@ -85,10 +86,7 @@ function onTick()
 	TIME_BASE = input.getNumber(31)
 	TIME = pingStatus and (TIME + 1) or TIME_BASE
 
-	if pingStatus and TIME > 0 then
-		--アクティヴモード
-		--debug.log("TST|| " .. TIME)
-
+	if pingStatus and TIME > 0 then --アクティヴモード
 		--ターゲットの取得
 		---@type Vector3[]
 		local targets = {}
@@ -133,9 +131,7 @@ function onTick()
 			output.setNumber(i + 16, not altitude and 0 or altitude) --深度(Y座標)
 		end
 
-	else
-		--パッシヴモード
-
+	else --パッシヴモード
 		--ターゲットの取得
 		---@type Vector3[]
 		local targets={}
@@ -170,4 +166,6 @@ function onTick()
 		end
 	end
 
+	--定常処理
+	output.setBool(9, pingStatus) --pingパススルー
 end
